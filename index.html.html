@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DISCOM Watch — India Power Distribution Health Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --ink: #0d1117;
+  --ink2: #1c2333;
+  --ink3: #253049;
+  --surface: #f5f3ef;
+  --surface2: #ede9e1;
+  --surface3: #e2ddd4;
+  --line: rgba(13,17,23,0.10);
+  --line2: rgba(13,17,23,0.18);
+  --text: #0d1117;
+  --text2: #4a5568;
+  --text3: #8a9bb0;
+  --gold: #c9971c;
+  --gold-lt: #fdf3dc;
+  --green: #1a7a4a;
+  --green-lt: #e0f5ea;
+  --red: #c0392b;
+  --red-lt: #fdecea;
+  --amber: #b7620e;
+  --amber-lt: #fef3e2;
+  --blue: #1a4fa0;
+  --blue-lt: #e3eeff;
+  --accent: #1a4fa0;
+  --font-display: 'DM Serif Display', Georgia, serif;
+  --font: 'DM Sans', sans-serif;
+  --mono: 'DM Mono', monospace;
+  --r: 12px;
+  --r-lg: 18px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--font);background:var(--surface);color:var(--text);font-size:14px;line-height:1.6;}
+
+/* ═══ PAGE SYSTEM ═══ */
+.view{display:none;}
+.view.active{display:block;}
+
+/* ═══════════════════════════════════
+   LANDING PAGE
+═══════════════════════════════════ */
+#view-landing{background:var(--ink);}
+
+.land-nav{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 48px;border-bottom:1px solid rgba(255,255,255,0.07);
+}
+.land-logo{display:flex;align-items:center;gap:12px;}
+.land-logo-icon{
+  width:38px;height:38px;background:var(--gold);border-radius:10px;
+  display:flex;align-items:center;justify-content:center;font-size:20px;
+}
+.land-logo-name{font-family:var(--font-display);font-size:20px;color:#fff;letter-spacing:-0.01em;}
+.land-logo-tag{font-size:11px;color:rgba(255,255,255,0.4);margin-top:-2px;}
+.land-nav-links{display:flex;gap:6px;}
+.land-nav-link{
+  padding:8px 16px;border-radius:8px;font-size:13px;cursor:pointer;
+  color:rgba(255,255,255,0.6);background:transparent;border:none;font-family:var(--font);
+  transition:all 0.15s;
+}
+.land-nav-link:hover{background:rgba(255,255,255,0.08);color:#fff;}
+.land-nav-cta{
+  padding:9px 20px;background:var(--gold);border:none;border-radius:9px;
+  font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;font-family:var(--font);
+  transition:all 0.15s;
+}
+.land-nav-cta:hover{background:#e0aa22;}
+
+/* Hero */
+.land-hero{
+  padding:90px 48px 70px;max-width:900px;margin:0 auto;text-align:center;
+  animation:fadeUp 0.7s ease both;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:none;}}
+
+.land-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(201,151,28,0.12);border:1px solid rgba(201,151,28,0.25);
+  border-radius:20px;padding:5px 14px;font-size:12px;color:var(--gold);
+  font-weight:500;margin-bottom:28px;letter-spacing:0.04em;
+}
+.live-dot{width:7px;height:7px;background:var(--gold);border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+
+.land-title{
+  font-family:var(--font-display);font-size:clamp(40px,5vw,64px);
+  color:#fff;line-height:1.1;letter-spacing:-0.02em;margin-bottom:20px;
+}
+.land-title em{color:var(--gold);font-style:italic;}
+
+.land-sub{
+  font-size:17px;color:rgba(255,255,255,0.55);line-height:1.7;
+  max-width:620px;margin:0 auto 40px;
+}
+
+.land-cta-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:60px;}
+.btn-hero-primary{
+  padding:14px 30px;background:var(--gold);border:none;border-radius:10px;
+  font-size:15px;font-weight:600;color:var(--ink);cursor:pointer;font-family:var(--font);
+  transition:all 0.2s;letter-spacing:0.01em;
+}
+.btn-hero-primary:hover{background:#e0aa22;transform:translateY(-1px);}
+.btn-hero-secondary{
+  padding:14px 30px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);
+  border-radius:10px;font-size:15px;color:rgba(255,255,255,0.8);
+  cursor:pointer;font-family:var(--font);transition:all 0.2s;
+}
+.btn-hero-secondary:hover{background:rgba(255,255,255,0.12);}
+
+/* Stat bar */
+.land-stats{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  border:1px solid rgba(255,255,255,0.08);border-radius:var(--r-lg);
+  overflow:hidden;margin:0 48px 0;max-width:1000px;margin-left:auto;margin-right:auto;
+  animation:fadeUp 0.8s 0.15s ease both;
+}
+.land-stat{
+  padding:28px 24px;border-right:1px solid rgba(255,255,255,0.08);
+  text-align:center;
+}
+.land-stat:last-child{border-right:none;}
+.land-stat-value{
+  font-family:var(--font-display);font-size:36px;color:#fff;
+  letter-spacing:-0.02em;margin-bottom:4px;
+}
+.land-stat-value span{font-size:18px;}
+.land-stat-label{font-size:12px;color:rgba(255,255,255,0.4);line-height:1.4;}
+.land-stat-change{
+  font-size:11px;margin-top:6px;font-weight:500;
+  padding:2px 8px;border-radius:10px;display:inline-block;
+}
+.chg-good{background:rgba(26,122,74,0.2);color:#4ade80;}
+.chg-bad{background:rgba(192,57,43,0.2);color:#f87171;}
+.chg-neutral{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.4);}
+
+/* What is section */
+.land-what{background:var(--ink2);padding:72px 48px;}
+.land-section-inner{max-width:1000px;margin:0 auto;}
+.land-section-label{font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);margin-bottom:14px;}
+.land-section-title{font-family:var(--font-display);font-size:36px;color:#fff;margin-bottom:16px;letter-spacing:-0.01em;}
+.land-section-body{font-size:15px;color:rgba(255,255,255,0.55);line-height:1.8;max-width:640px;}
+
+.concept-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:40px;}
+.concept-card{
+  background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);
+  border-radius:var(--r);padding:24px;
+}
+.concept-icon{font-size:28px;margin-bottom:14px;}
+.concept-title{font-size:15px;font-weight:600;color:#fff;margin-bottom:8px;}
+.concept-body{font-size:13px;color:rgba(255,255,255,0.5);line-height:1.7;}
+.concept-tag{
+  display:inline-block;margin-top:12px;font-size:11px;font-weight:600;
+  padding:3px 9px;border-radius:6px;
+}
+
+/* Features */
+.land-features{background:var(--ink);padding:72px 48px;}
+.features-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-top:40px;}
+.feature-item{display:flex;gap:16px;padding:20px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:var(--r);}
+.feature-num{font-family:var(--mono);font-size:12px;color:var(--gold);opacity:0.6;flex-shrink:0;padding-top:3px;}
+.feature-title{font-size:14px;font-weight:600;color:#fff;margin-bottom:5px;}
+.feature-body{font-size:13px;color:rgba(255,255,255,0.45);line-height:1.6;}
+
+/* Sources */
+.land-sources{background:var(--ink2);padding:72px 48px;}
+.source-pills{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px;}
+.source-pill{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+  border-radius:20px;padding:8px 16px;font-size:13px;color:rgba(255,255,255,0.7);
+}
+.src-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+
+/* CTA section */
+.land-bottom-cta{
+  background:linear-gradient(135deg,#0d1117 0%,#1c2a4a 100%);
+  padding:80px 48px;text-align:center;
+  border-top:1px solid rgba(201,151,28,0.15);
+}
+.land-bottom-title{font-family:var(--font-display);font-size:40px;color:#fff;margin-bottom:14px;}
+.land-bottom-sub{font-size:15px;color:rgba(255,255,255,0.5);margin-bottom:36px;}
+
+/* Footer */
+.land-footer{
+  background:var(--ink);border-top:1px solid rgba(255,255,255,0.06);
+  padding:24px 48px;display:flex;align-items:center;justify-content:space-between;
+}
+.land-footer-text{font-size:12px;color:rgba(255,255,255,0.3);}
+.land-footer-links{display:flex;gap:20px;}
+.land-footer-link{font-size:12px;color:rgba(255,255,255,0.35);cursor:pointer;transition:color 0.15s;}
+.land-footer-link:hover{color:rgba(255,255,255,0.7);}
+
+/* ═══════════════════════════════════
+   DASHBOARD
+═══════════════════════════════════ */
+#view-dashboard{background:var(--surface);}
+
+.dash-layout{display:flex;min-height:100vh;}
+
+.dash-sidebar{
+  width:230px;flex-shrink:0;background:#fff;
+  border-right:1px solid var(--line);
+  position:fixed;top:0;left:0;bottom:0;z-index:100;
+  display:flex;flex-direction:column;
+}
+.dash-logo{
+  padding:20px 18px;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:10px;cursor:pointer;
+}
+.dash-logo-icon{width:32px;height:32px;background:var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.dash-logo-name{font-family:var(--font-display);font-size:17px;letter-spacing:-0.01em;}
+.dash-logo-tag{font-size:10px;color:var(--text3);}
+
+.dash-nav{padding:14px 10px;flex:1;overflow-y:auto;}
+.dash-nav-group{font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);padding:0 8px;margin:14px 0 5px;}
+.dash-nav-item{
+  display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;
+  cursor:pointer;color:var(--text2);font-size:13px;transition:all 0.12s;
+  border:none;background:none;width:100%;text-align:left;font-family:var(--font);
+  margin-bottom:1px;
+}
+.dash-nav-item:hover{background:var(--surface2);color:var(--text);}
+.dash-nav-item.active{background:var(--blue-lt);color:var(--blue);}
+.dash-nav-icon{font-size:15px;width:18px;text-align:center;flex-shrink:0;}
+.dash-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;padding:1px 6px;border-radius:10px;font-weight:600;}
+
+.dash-sidebar-footer{
+  padding:14px 16px;border-top:1px solid var(--line);font-size:11px;color:var(--text3);
+}
+.live-pill{display:inline-flex;align-items:center;gap:5px;background:var(--green-lt);color:var(--green);padding:3px 9px;border-radius:12px;font-size:10px;font-weight:600;margin-bottom:5px;}
+
+.dash-main{margin-left:230px;flex:1;}
+
+.dash-topbar{
+  position:sticky;top:0;z-index:50;background:rgba(245,243,239,0.95);
+  backdrop-filter:blur(10px);border-bottom:1px solid var(--line);
+  padding:0 28px;display:flex;align-items:center;gap:14px;height:58px;
+}
+.dash-page-title{font-size:15px;font-weight:600;flex:1;}
+.dash-search{
+  background:#fff;border:1px solid var(--line2);border-radius:8px;
+  padding:7px 12px;font-size:13px;font-family:var(--font);outline:none;
+  width:220px;transition:border-color 0.15s;
+}
+.dash-search:focus{border-color:var(--accent);}
+.dash-search::placeholder{color:var(--text3);}
+.select-sm{
+  background:#fff;border:1px solid var(--line2);border-radius:8px;
+  padding:7px 28px 7px 10px;font-size:12px;font-family:var(--font);
+  appearance:none;cursor:pointer;color:var(--text);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238a9bb0' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 9px center;
+}
+.btn-sm{
+  padding:7px 14px;border-radius:8px;font-size:12px;font-family:var(--font);
+  cursor:pointer;font-weight:500;transition:all 0.12s;border:1px solid var(--line2);
+  background:#fff;color:var(--text2);
+}
+.btn-sm:hover{background:var(--surface2);color:var(--text);}
+.btn-sm-primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+.btn-sm-primary:hover{background:#1e5dbd;}
+
+/* Dash pages */
+.dash-page{display:none;padding:24px 28px;animation:fadeIn 0.25s ease;}
+.dash-page.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+
+/* Explainer strip */
+.explainer{
+  background:var(--blue-lt);border:1px solid rgba(26,79,160,0.15);
+  border-radius:var(--r);padding:14px 18px;margin-bottom:22px;
+  display:flex;align-items:flex-start;gap:12px;
+}
+.explainer-icon{font-size:20px;flex-shrink:0;margin-top:1px;}
+.explainer-title{font-size:13px;font-weight:600;color:var(--blue);margin-bottom:3px;}
+.explainer-text{font-size:12px;color:#3a5a8a;line-height:1.6;}
+.explainer-close{margin-left:auto;background:none;border:none;cursor:pointer;color:#3a5a8a;font-size:16px;padding:0 4px;flex-shrink:0;}
+
+/* KPI cards */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+.kpi-card{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r);
+  padding:18px;position:relative;overflow:hidden;
+}
+.kpi-card::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--kpi-color,var(--accent));}
+.kpi-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;}
+.kpi-value{font-family:var(--font-display);font-size:30px;color:var(--text);line-height:1;margin-bottom:4px;}
+.kpi-value sup{font-size:14px;}
+.kpi-sub{font-size:11px;color:var(--text3);margin-bottom:10px;}
+.kpi-change{font-size:11px;font-weight:600;padding:2px 8px;border-radius:6px;display:inline-block;}
+.kpi-good{background:var(--green-lt);color:var(--green);}
+.kpi-bad{background:var(--red-lt);color:var(--red);}
+.kpi-neutral{background:var(--surface2);color:var(--text3);}
+.kpi-help{
+  position:absolute;top:14px;right:14px;width:18px;height:18px;border-radius:50%;
+  background:var(--surface2);border:none;font-size:11px;cursor:pointer;
+  color:var(--text3);display:flex;align-items:center;justify-content:center;font-weight:700;
+}
+
+/* Alert */
+.alert-bar{
+  background:var(--red-lt);border:1px solid rgba(192,57,43,0.2);border-radius:var(--r);
+  padding:13px 16px;margin-bottom:22px;display:flex;align-items:flex-start;gap:11px;
+}
+.alert-ico{font-size:16px;flex-shrink:0;margin-top:1px;}
+.alert-title{font-size:13px;font-weight:600;color:var(--red);margin-bottom:2px;}
+.alert-body{font-size:12px;color:#7a3028;line-height:1.5;}
+
+/* Section header */
+.sec-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.sec-title{font-size:14px;font-weight:600;}
+.sec-sub{font-size:11px;color:var(--text3);margin-top:1px;}
+
+/* Table */
+.table-card{background:#fff;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-bottom:22px;}
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+thead th{
+  padding:10px 14px;text-align:left;font-size:10px;font-weight:600;
+  color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;
+  border-bottom:1px solid var(--line);white-space:nowrap;cursor:pointer;
+  user-select:none;background:var(--surface);transition:color 0.12s;
+}
+thead th:hover{color:var(--text2);}
+thead th.sorted{color:var(--accent);}
+tbody tr{border-bottom:1px solid var(--line);cursor:pointer;transition:background 0.1s;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:var(--surface);}
+tbody td{padding:12px 14px;font-size:13px;vertical-align:middle;}
+
+.state-cell{display:flex;align-items:center;gap:10px;}
+.state-av{width:28px;height:28px;border-radius:7px;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.state-name{font-weight:500;color:var(--text);}
+.state-util{font-size:11px;color:var(--text3);}
+
+.health-pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;white-space:nowrap;}
+.hp-good{background:var(--green-lt);color:var(--green);}
+.hp-fair{background:var(--amber-lt);color:var(--amber);}
+.hp-poor{background:var(--red-lt);color:var(--red);}
+.hp-critical{background:#ffe4e1;color:#8b0000;border:1px solid rgba(192,57,43,0.3);}
+
+.bar-cell{display:flex;align-items:center;gap:7px;min-width:90px;}
+.bar-track{flex:1;height:5px;background:var(--surface2);border-radius:3px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:3px;}
+.mono{font-family:var(--mono);font-size:12px;}
+
+.yoy-chip{font-size:11px;padding:2px 7px;border-radius:5px;font-weight:500;}
+.yoy-up{background:var(--green-lt);color:var(--green);}
+.yoy-dn{background:var(--red-lt);color:var(--red);}
+.yoy-eq{background:var(--surface2);color:var(--text3);}
+
+/* Sub-page tabs */
+.page-tabs{display:flex;gap:4px;margin-bottom:20px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:4px;width:fit-content;}
+.page-tab{padding:6px 14px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;color:var(--text2);transition:all 0.12s;border:none;background:none;font-family:var(--font);}
+.page-tab.active{background:var(--surface2);color:var(--text);}
+
+.sub-panel{display:none;}
+.sub-panel.active{display:block;animation:fadeIn 0.2s ease;}
+
+/* Chart cards */
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px;}
+.chart-card{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:18px;}
+.chart-title{font-size:13px;font-weight:600;margin-bottom:3px;}
+.chart-sub{font-size:11px;color:var(--text3);margin-bottom:14px;}
+.chart-wrap{position:relative;height:200px;}
+
+/* Stress page */
+.stress-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.stress-card{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r);
+  padding:16px;cursor:pointer;transition:all 0.15s;
+}
+.stress-card:hover{border-color:var(--line2);transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,0.06);}
+.sc-state{font-size:14px;font-weight:600;margin-bottom:1px;}
+.sc-util{font-size:11px;color:var(--text3);margin-bottom:12px;}
+.sc-bar{height:6px;background:var(--surface2);border-radius:3px;margin-bottom:8px;overflow:hidden;}
+.sc-fill{height:100%;border-radius:3px;}
+.sc-score{font-family:var(--font-display);font-size:26px;margin-bottom:1px;}
+.sc-score-label{font-size:11px;color:var(--text3);}
+.sc-flags{display:flex;flex-wrap:wrap;gap:4px;margin-top:10px;}
+.sc-flag{font-size:10px;padding:2px 7px;border-radius:5px;background:var(--red-lt);color:var(--red);font-weight:500;}
+
+/* Glossary */
+.glossary-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.gloss-card{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:18px;}
+.gloss-term{font-size:15px;font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:10px;}
+.gloss-abbr{font-size:12px;background:var(--gold-lt);color:var(--gold);padding:2px 8px;border-radius:6px;font-weight:600;}
+.gloss-def{font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:10px;}
+.gloss-example{font-size:12px;color:var(--text3);background:var(--surface);border-radius:7px;padding:10px 12px;line-height:1.6;}
+.gloss-ex-label{font-weight:600;color:var(--text2);margin-bottom:2px;}
+
+/* Compare */
+.cmp-table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;}
+.cmp-table th{padding:12px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);background:var(--surface);border-bottom:1px solid var(--line);}
+.cmp-table td{padding:12px 16px;font-size:13px;border-bottom:1px solid var(--line);}
+.cmp-table tr:last-child td{border-bottom:none;}
+.cmp-best{color:var(--green);font-weight:600;}
+.cmp-worst{color:var(--red);}
+
+/* Trend */
+.trend-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+
+/* Detail panel */
+.detail-overlay{position:fixed;inset:0;background:rgba(13,17,23,0.5);z-index:200;display:none;align-items:flex-start;justify-content:flex-end;backdrop-filter:blur(3px);}
+.detail-overlay.open{display:flex;}
+.detail-panel{width:520px;height:100vh;background:#fff;border-left:1px solid var(--line);overflow-y:auto;animation:slideIn 0.3s ease;}
+@keyframes slideIn{from{transform:translateX(24px);opacity:0;}to{transform:none;opacity:1;}}
+.dp-header{padding:22px 24px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#fff;z-index:10;display:flex;align-items:flex-start;justify-content:space-between;}
+.dp-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--text3);padding:2px 6px;border-radius:6px;transition:all 0.12s;}
+.dp-close:hover{background:var(--surface2);color:var(--text);}
+.dp-body{padding:22px 24px;}
+.dp-kpi-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:18px;}
+.dp-kpi{background:var(--surface);border-radius:10px;padding:14px;}
+.dp-kpi-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px;}
+.dp-kpi-val{font-size:20px;font-weight:700;}
+.dp-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px;}
+.dp-info-row{padding:10px 12px;background:var(--surface);border-radius:8px;}
+.dp-info-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;}
+.dp-info-val{font-size:13px;font-weight:500;margin-top:2px;}
+.ai-card{background:linear-gradient(135deg,#eef3ff 0%,#f0f8ff 100%);border:1px solid rgba(26,79,160,0.12);border-radius:var(--r);padding:16px;margin-bottom:18px;}
+.ai-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--blue);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.ai-text{font-size:13px;color:#2a3f6a;line-height:1.7;}
+.dp-chart-wrap{height:150px;position:relative;}
+.dp-sec-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--text3);margin:16px 0 10px;}
+
+/* Beginner tooltip */
+.explain-btn{
+  display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--text3);
+  background:none;border:none;cursor:pointer;font-family:var(--font);
+  text-decoration:underline;text-underline-offset:2px;margin-left:6px;
+}
+.explain-btn:hover{color:var(--accent);}
+
+/* ═══ Responsive ═══ */
+@media(max-width:1100px){.kpi-grid{grid-template-columns:1fr 1fr;}.chart-grid{grid-template-columns:1fr;}.stress-grid{grid-template-columns:1fr 1fr;}.glossary-grid{grid-template-columns:1fr;}}
+@media(max-width:780px){.land-stats{grid-template-columns:1fr 1fr;}.concept-grid{grid-template-columns:1fr;}.features-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════
+     LANDING PAGE — the shareable URL
+═══════════════════════════════════ -->
+<div id="view-landing" class="view active">
+
+  <nav class="land-nav">
+    <div class="land-logo">
+      <div class="land-logo-icon">⚡</div>
+      <div>
+        <div class="land-logo-name">DISCOM Watch</div>
+        <div class="land-logo-tag">India · Power Distribution Health</div>
+      </div>
+    </div>
+    <div class="land-nav-links">
+      <button class="land-nav-link" onclick="scrollTo('#land-what')">What is this?</button>
+      <button class="land-nav-link" onclick="scrollTo('#land-sources')">Data Sources</button>
+    </div>
+    <button class="land-nav-cta" onclick="showDash()">Open Dashboard →</button>
+  </nav>
+
+  <div class="land-hero">
+    <div class="land-eyebrow">
+      <span class="live-dot"></span>
+      FY 2024–25 Data · Latest PFC Report
+    </div>
+    <h1 class="land-title">
+      India's Power<br>
+      Distribution Sector,<br>
+      <em>finally transparent.</em>
+    </h1>
+    <p class="land-sub">
+      Track financial health of 63 electricity utilities across 28 states. Built for researchers, policymakers, and anyone who wants to understand why your electricity bill looks the way it does.
+    </p>
+    <div class="land-cta-row">
+      <button class="btn-hero-primary" onclick="showDash()">Explore the Dashboard →</button>
+      <button class="btn-hero-secondary" onclick="scrollTo('#land-what')">What is a DISCOM?</button>
+    </div>
+  </div>
+
+  <div class="land-stats">
+    <div class="land-stat">
+      <div class="land-stat-value">15.04<span>%</span></div>
+      <div class="land-stat-label">National AT&C Loss<br>FY 2024–25</div>
+      <div class="land-stat-change chg-good">▼ Record low since 2008</div>
+    </div>
+    <div class="land-stat">
+      <div class="land-stat-value">₹0.39<span>/unit</span></div>
+      <div class="land-stat-label">Avg ACS–ARR Gap<br>Cost vs. Revenue</div>
+      <div class="land-stat-change chg-good">▼ Down from ₹0.84 in FY13</div>
+    </div>
+    <div class="land-stat">
+      <div class="land-stat-value">₹2,701<span>Cr</span></div>
+      <div class="land-stat-label">First-ever collective profit<br>FY 2024–25</div>
+      <div class="land-stat-change chg-good">Historic turnaround</div>
+    </div>
+    <div class="land-stat">
+      <div class="land-stat-value">₹6.47<span>L Cr</span></div>
+      <div class="land-stat-label">Accumulated losses<br>still on books</div>
+      <div class="land-stat-change chg-bad">Context: not out of debt yet</div>
+    </div>
+  </div>
+
+  <div id="land-what" class="land-what">
+    <div class="land-section-inner">
+      <div class="land-section-label">For Beginners</div>
+      <div class="land-section-title">What exactly is a DISCOM?</div>
+      <div class="land-section-body">A DISCOM (Distribution Company) is the company that delivers electricity to your home, office, or factory. Think of the power sector like a supply chain: power plants <em>generate</em> electricity → transmission lines <em>carry</em> it across long distances → DISCOMs <em>distribute</em> it to you and collect your bill. India has 72 such utilities, mostly state-owned. Their financial health directly determines whether you get reliable power — and whether your tariff goes up.</div>
+      <div class="concept-grid">
+        <div class="concept-card">
+          <div class="concept-icon">⚡</div>
+          <div class="concept-title">AT&C Loss</div>
+          <div class="concept-body">Aggregate Technical & Commercial loss. Simply: electricity that was produced but not paid for. This includes power lost in wires AND power consumed but not billed/collected. National target is 12–15%.</div>
+          <div class="concept-tag" style="background:rgba(201,151,28,0.15);color:var(--gold);">National avg: 15.04% ✓</div>
+        </div>
+        <div class="concept-card">
+          <div class="concept-icon">📊</div>
+          <div class="concept-title">ACS–ARR Gap</div>
+          <div class="concept-body">Average Cost of Supply minus Average Revenue Realised. If it costs ₹7 to supply 1 unit but you only recover ₹6.61, the gap is ₹0.39/unit. That shortfall is covered by state government subsidies or leads to losses.</div>
+          <div class="concept-tag" style="background:rgba(26,122,74,0.15);color:var(--green);">Govt target: Zero gap</div>
+        </div>
+        <div class="concept-card">
+          <div class="concept-icon">🏦</div>
+          <div class="concept-title">Accumulated Losses</div>
+          <div class="concept-body">The total debt pile built up over decades of losses. Even though DISCOMs posted their first profit in FY25, the ₹6.47 lakh crore in accumulated losses is effectively guaranteed by state governments — affecting their credit ratings.</div>
+          <div class="concept-tag" style="background:rgba(192,57,43,0.15);color:var(--red);">Still a systemic risk</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="land-features">
+    <div class="land-section-inner">
+      <div class="land-section-label">What's inside</div>
+      <div class="land-section-title">Built for every level of user</div>
+      <div class="features-grid">
+        <div class="feature-item">
+          <div class="feature-num">01</div>
+          <div><div class="feature-title">National Overview with Beginner Tooltips</div><div class="feature-body">Every metric has a "what does this mean?" explainer built in. No prior knowledge of power sector needed.</div></div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-num">02</div>
+          <div><div class="feature-title">FY 2024–25 Data — Most Current Available</div><div class="feature-body">Based on the latest PFC Annual Report released in 2025. Covers 63 utilities across 28 states.</div></div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-num">03</div>
+          <div><div class="feature-title">Stress Monitor — 9 Utilities Flagged</div><div class="feature-body">Composite stress score that automatically identifies which DISCOMs are at risk of payment defaults or supply disruptions.</div></div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-num">04</div>
+          <div><div class="feature-title">AI-Generated State Analysis</div><div class="feature-body">Click any state for a plain-language summary of its financial situation, key risks, and what it means for consumers.</div></div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-num">05</div>
+          <div><div class="feature-title">5-Year Trend View</div><div class="feature-body">See the full journey from FY 2019–20 to FY 2024–25 — the impact of RDSS reforms, LPS rules, and UDAY in one view.</div></div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-num">06</div>
+          <div><div class="feature-title">State-by-State Comparison</div><div class="feature-body">Pick any 3 states and compare them head-to-head across all key indicators. Best and worst automatically highlighted.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="land-sources" class="land-sources">
+    <div class="land-section-inner">
+      <div class="land-section-label">Data Transparency</div>
+      <div class="land-section-title">Where does this data come from?</div>
+      <div class="land-section-body">All data is sourced from official Government of India public portals. No manual inputs, no estimates. Auto-updated when sources publish new reports.</div>
+      <div class="source-pills">
+        <div class="source-pill"><span class="src-dot" style="background:#4ade80"></span> PFC Annual Report FY 2024–25 · Primary source · 63 utilities</div>
+        <div class="source-pill"><span class="src-dot" style="background:#4ade80"></span> data.gov.in · Open Government Data · REST API</div>
+        <div class="source-pill"><span class="src-dot" style="background:#4ade80"></span> NITI Aayog ICED Dashboard · Cross-validation</div>
+        <div class="source-pill"><span class="src-dot" style="background:#facc15"></span> MoP Integrated Rating (13th Edition) · Annual</div>
+        <div class="source-pill"><span class="src-dot" style="background:#facc15"></span> UDAY Portal · FY19–FY21 historical trends</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="land-bottom-cta">
+    <div class="land-section-inner" style="text-align:center">
+      <div class="land-bottom-title">Ready to explore?</div>
+      <div class="land-bottom-sub">Open the full interactive dashboard — no login, no signup, completely free.</div>
+      <button class="btn-hero-primary" onclick="showDash()" style="font-size:16px;padding:16px 36px;">Open Dashboard →</button>
+    </div>
+  </div>
+
+  <footer class="land-footer">
+    <div class="land-footer-text">© 2025 DISCOM Watch · Data: PFC, MoP, NITI Aayog · Built with CEEW research inputs</div>
+    <div class="land-footer-links">
+      <span class="land-footer-link" onclick="showDash('glossary')">Glossary</span>
+      <span class="land-footer-link" onclick="showDash('sources')">Data Sources</span>
+      <span class="land-footer-link">Methodology</span>
+    </div>
+  </footer>
+</div>
+
+<!-- ═══════════════════════════════════
+     DASHBOARD VIEW
+═══════════════════════════════════ -->
+<div id="view-dashboard" class="view">
+<div class="dash-layout">
+
+  <!-- Sidebar -->
+  <nav class="dash-sidebar">
+    <div class="dash-logo" onclick="showLanding()">
+      <div class="dash-logo-icon">⚡</div>
+      <div>
+        <div class="dash-logo-name">DISCOM Watch</div>
+        <div class="dash-logo-tag">← Back to home</div>
+      </div>
+    </div>
+    <div class="dash-nav">
+      <div class="dash-nav-group">Analysis</div>
+      <button class="dash-nav-item active" onclick="navTo('overview',this)"><span class="dash-nav-icon">▦</span> National Overview</button>
+      <button class="dash-nav-item" onclick="navTo('stress',this)"><span class="dash-nav-icon">⚠</span> Stress Monitor <span class="dash-badge">9</span></button>
+      <button class="dash-nav-item" onclick="navTo('trends',this)"><span class="dash-nav-icon">↗</span> 5-Year Trends</button>
+      <button class="dash-nav-item" onclick="navTo('compare',this)"><span class="dash-nav-icon">⇄</span> Compare States</button>
+      <div class="dash-nav-group">Learn</div>
+      <button class="dash-nav-item" onclick="navTo('glossary',this)"><span class="dash-nav-icon">📖</span> Glossary</button>
+      <button class="dash-nav-item" onclick="navTo('sources',this)"><span class="dash-nav-icon">🔗</span> Data Sources</button>
+    </div>
+    <div class="dash-sidebar-footer">
+      <div class="live-pill"><span class="live-dot" style="background:var(--green)"></span> Data active</div>
+      <div>PFC FY 2024–25 Report</div>
+      <div style="color:var(--text3);margin-top:2px;font-size:10px">Released: March 2025</div>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <div class="dash-main">
+    <div class="dash-topbar">
+      <div class="dash-page-title" id="dash-title">National Overview</div>
+      <input class="dash-search" placeholder="Search state or DISCOM…" oninput="searchTable(this.value)" id="srch">
+      <select class="select-sm" id="reg-f" onchange="applyF()">
+        <option value="all">All Regions</option>
+        <option value="north">North</option>
+        <option value="south">South</option>
+        <option value="east">East</option>
+        <option value="west">West</option>
+        <option value="northeast">Northeast</option>
+      </select>
+      <select class="select-sm" id="hlth-f" onchange="applyF()">
+        <option value="all">All Health</option>
+        <option value="Good">Good</option>
+        <option value="Fair">Fair</option>
+        <option value="Poor">Poor</option>
+        <option value="Critical">Critical</option>
+      </select>
+      <button class="btn-sm btn-sm-primary" onclick="exportCSV()">↓ Export</button>
+    </div>
+
+    <!-- OVERVIEW -->
+    <div class="dash-page active" id="pg-overview">
+      <div class="explainer" id="exp-overview">
+        <div class="explainer-icon">💡</div>
+        <div>
+          <div class="explainer-title">New to this dashboard? Start here.</div>
+          <div class="explainer-text">This page shows the financial health of India's 63 electricity distribution companies (DISCOMs) using FY 2024–25 data from the Power Finance Corporation. <strong>Click any row</strong> in the table below to see a detailed breakdown and AI-generated plain-language summary for that state.</div>
+        </div>
+        <button class="explainer-close" onclick="this.closest('.explainer').style.display='none'">✕</button>
+      </div>
+
+      <div class="alert-bar">
+        <div class="alert-ico">⚠</div>
+        <div>
+          <div class="alert-title">9 utilities remain in financial distress despite national turnaround</div>
+          <div class="alert-body">While DISCOMs posted a historic first profit in FY25, states including J&K, Jharkhand, Bihar, Assam, Nagaland, Manipur and Rajasthan continue to show critical financial stress. Combined accumulated losses: ₹6.47 lakh crore.</div>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card" style="--kpi-color:#1a4fa0">
+          <div class="kpi-label">AT&C Loss — National Avg <button class="kpi-help" onclick="showGloss('atc')">?</button></div>
+          <div class="kpi-value">15.04<sup>%</sup></div>
+          <div class="kpi-sub">Record low since FY 2008–09</div>
+          <div class="kpi-change kpi-good">▼ Down from 25.5% in FY13</div>
+        </div>
+        <div class="kpi-card" style="--kpi-color:#c0392b">
+          <div class="kpi-label">ACS–ARR Gap <button class="kpi-help" onclick="showGloss('gap')">?</button></div>
+          <div class="kpi-value">₹0.39<sup>/unit</sup></div>
+          <div class="kpi-sub">Cost vs. revenue shortfall per kWh</div>
+          <div class="kpi-change kpi-good">▼ Down from ₹0.84 in FY13</div>
+        </div>
+        <div class="kpi-card" style="--kpi-color:#1a7a4a">
+          <div class="kpi-label">Sector Profit — FY 2024–25</div>
+          <div class="kpi-value">₹2,701<sup>Cr</sup></div>
+          <div class="kpi-sub">First collective profit ever</div>
+          <div class="kpi-change kpi-good">Historic milestone</div>
+        </div>
+        <div class="kpi-card" style="--kpi-color:#b7620e">
+          <div class="kpi-label">Accumulated Losses <button class="kpi-help" onclick="showGloss('acc')">?</button></div>
+          <div class="kpi-value">₹6.47<sup>L Cr</sup></div>
+          <div class="kpi-sub">Still on state balance sheets</div>
+          <div class="kpi-change kpi-bad">Context: operational ≠ debt-free</div>
+        </div>
+      </div>
+
+      <div class="page-tabs">
+        <button class="page-tab active" onclick="switchSub('tab-table',this)">All Utilities Table</button>
+        <button class="page-tab" onclick="switchSub('tab-charts',this)">Distribution Charts</button>
+      </div>
+
+      <div class="sub-panel active" id="tab-table">
+        <div class="table-card">
+          <div class="table-wrap">
+            <table id="main-table">
+              <thead>
+                <tr>
+                  <th onclick="srt('state')">State / Utility ↕</th>
+                  <th onclick="srt('atc')" class="sorted">AT&C Loss ↕</th>
+                  <th onclick="srt('gap')">ACS–ARR Gap ↕</th>
+                  <th onclick="srt('billing')">Billing Eff. ↕</th>
+                  <th onclick="srt('collection')">Collection Eff. ↕</th>
+                  <th onclick="srt('health')">Health ↕</th>
+                  <th>Trend</th>
+                </tr>
+              </thead>
+              <tbody id="tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub-panel" id="tab-charts">
+        <div class="chart-grid">
+          <div class="chart-card">
+            <div class="chart-title">AT&C Loss — State Distribution</div>
+            <div class="chart-sub">Count of utilities by loss band · FY 2024–25</div>
+            <div class="chart-wrap"><canvas id="c-dist"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">ACS–ARR Gap by Region</div>
+            <div class="chart-sub">Average ₹/unit · FY 2024–25</div>
+            <div class="chart-wrap"><canvas id="c-region"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Billing vs Collection Efficiency</div>
+            <div class="chart-sub">Top 10 states by AT&C loss · FY 2024–25</div>
+            <div class="chart-wrap"><canvas id="c-bvc"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Health Rating Breakdown</div>
+            <div class="chart-sub">Distribution across 28 state utilities</div>
+            <div class="chart-wrap"><canvas id="c-pie"></canvas></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STRESS -->
+    <div class="dash-page" id="pg-stress">
+      <div class="explainer" id="exp-stress">
+        <div class="explainer-icon">🔴</div>
+        <div>
+          <div class="explainer-title">How is the Stress Score calculated?</div>
+          <div class="explainer-text">Each utility is scored 0–100 based on four factors: AT&C loss level (how much power is lost/unbilled), ACS–ARR gap (how much they lose per unit sold), trend direction (getting better or worse?), and collection efficiency. A score above 60 means the utility is at significant risk of payment defaults or supply disruption.</div>
+        </div>
+        <button class="explainer-close" onclick="this.closest('.explainer').style.display='none'">✕</button>
+      </div>
+      <div class="stress-grid" id="stress-grid"></div>
+    </div>
+
+    <!-- TRENDS -->
+    <div class="dash-page" id="pg-trends">
+      <div class="explainer">
+        <div class="explainer-icon">📈</div>
+        <div>
+          <div class="explainer-title">Reading the trend charts</div>
+          <div class="explainer-text">These charts show the national-level 6-year journey from FY 2019–20 to FY 2024–25. Key milestones: RDSS scheme launched FY21, Late Payment Surcharge (LPS) rules introduced FY22 — both visible as inflection points in these charts.</div>
+        </div>
+        <button class="explainer-close" onclick="this.closest('.explainer').style.display='none'">✕</button>
+      </div>
+      <div class="trend-grid">
+        <div class="chart-card">
+          <div class="chart-title">AT&C Losses — National Average</div>
+          <div class="chart-sub">% · FY 2019–20 to FY 2024–25</div>
+          <div class="chart-wrap"><canvas id="t-atc"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">ACS–ARR Gap</div>
+          <div class="chart-sub">₹/unit · National average</div>
+          <div class="chart-wrap"><canvas id="t-gap"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Billing Efficiency</div>
+          <div class="chart-sub">% · National average</div>
+          <div class="chart-wrap"><canvas id="t-bill"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Collection Efficiency</div>
+          <div class="chart-sub">% · National average — LPS rules drove jump in FY23</div>
+          <div class="chart-wrap"><canvas id="t-coll"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMPARE -->
+    <div class="dash-page" id="pg-compare">
+      <div class="explainer">
+        <div class="explainer-icon">⇄</div>
+        <div>
+          <div class="explainer-title">How to use this</div>
+          <div class="explainer-text">Select up to 3 states to compare side-by-side. Green values = best performer on that metric. Red values = worst. This is useful for benchmarking — e.g. see what Gujarat does differently from Jharkhand on AT&C losses.</div>
+        </div>
+        <button class="explainer-close" onclick="this.closest('.explainer').style.display='none'">✕</button>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px">
+        <select class="select-sm" id="c1" style="padding:9px 30px 9px 12px;font-size:13px" onchange="renderCmp()"><option value="">Select state 1…</option></select>
+        <select class="select-sm" id="c2" style="padding:9px 30px 9px 12px;font-size:13px" onchange="renderCmp()"><option value="">Select state 2…</option></select>
+        <select class="select-sm" id="c3" style="padding:9px 30px 9px 12px;font-size:13px" onchange="renderCmp()"><option value="">Select state 3…</option></select>
+      </div>
+      <div id="cmp-out"></div>
+    </div>
+
+    <!-- GLOSSARY -->
+    <div class="dash-page" id="pg-glossary">
+      <div class="explainer">
+        <div class="explainer-icon">📖</div>
+        <div>
+          <div class="explainer-title">New to power sector jargon? This page is for you.</div>
+          <div class="explainer-text">Every term used in this dashboard is explained below in plain English, with a real-world example. You don't need an engineering or economics background to understand this data.</div>
+        </div>
+        <button class="explainer-close" onclick="this.closest('.explainer').style.display='none'">✕</button>
+      </div>
+      <div class="glossary-grid" id="gloss-grid"></div>
+    </div>
+
+    <!-- SOURCES -->
+    <div class="dash-page" id="pg-sources">
+      <div style="display:grid;gap:12px;max-width:760px" id="sources-list"></div>
+    </div>
+
+  </div><!-- /dash-main -->
+</div><!-- /dash-layout -->
+</div><!-- /view-dashboard -->
+
+<!-- DETAIL OVERLAY -->
+<div class="detail-overlay" id="det-overlay" onclick="closeDet(event)">
+  <div class="detail-panel">
+    <div class="dp-header">
+      <div>
+        <div id="dp-name" style="font-size:20px;font-weight:700;margin-bottom:3px"></div>
+        <div id="dp-util" style="font-size:12px;color:var(--text3)"></div>
+      </div>
+      <button class="dp-close" onclick="closeDet()">✕</button>
+    </div>
+    <div class="dp-body">
+      <div class="dp-kpi-row" id="dp-kpis"></div>
+      <div class="ai-card">
+        <div class="ai-label">✦ AI Plain-Language Analysis</div>
+        <div class="ai-text" id="dp-ai">Generating summary…</div>
+      </div>
+      <div class="dp-sec-title">Key Indicators</div>
+      <div class="dp-info-grid" id="dp-info"></div>
+      <div class="dp-sec-title">AT&C Loss Trend — FY20 to FY25</div>
+      <div class="dp-chart-wrap"><canvas id="dp-chart"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════
+// DATA — PFC FY 2024-25 (latest available)
+// ════════════════════════════════════════════
+const DATA = [
+  {id:1, state:"Delhi", util:"BRPL / BYPL / TPDDL", region:"north", atc:7.5, gap:-0.18, billing:98.5, collection:99.1, health:"Good", yoy:"better", acc:0, trend:[10.2,9.5,8.8,8.2,7.8,7.5], note:"privatised"},
+  {id:2, state:"Gujarat", util:"MGVCL / DGVCL / UGVCL", region:"west", atc:9.4, gap:-0.28, billing:97.2, collection:98.4, health:"Good", yoy:"better", acc:0, trend:[12.8,11.5,10.8,10.1,9.8,9.4]},
+  {id:3, state:"Telangana", util:"TSSPDCL / TSNPDCL", region:"south", atc:10.2, gap:-0.08, billing:94.5, collection:96.2, health:"Good", yoy:"better", acc:0, trend:[14.2,13.1,12.2,11.5,10.8,10.2]},
+  {id:4, state:"Goa", util:"Goa PD", region:"west", atc:10.4, gap:-0.14, billing:99.1, collection:97.8, health:"Good", yoy:"better", acc:0, trend:[13.2,12.4,11.8,11.2,10.8,10.4]},
+  {id:5, state:"Andhra Pradesh", util:"APEPDCL / APSPDCL", region:"south", atc:10.9, gap:0.06, billing:93.8, collection:93.5, health:"Good", yoy:"better", acc:1800, trend:[15.1,13.8,12.8,12.0,11.4,10.9]},
+  {id:6, state:"Karnataka", util:"BESCOM / MESCOM / GESCOM", region:"south", atc:11.5, gap:0.04, billing:93.4, collection:93.0, health:"Good", yoy:"better", acc:3800, trend:[16.2,14.8,13.2,12.5,12.0,11.5]},
+  {id:7, state:"Kerala", util:"KSEB", region:"south", atc:11.6, gap:0.07, billing:93.2, collection:92.8, health:"Good", yoy:"better", acc:2900, trend:[14.8,13.9,13.0,12.4,11.9,11.6]},
+  {id:8, state:"Tamil Nadu", util:"TNPDCL", region:"south", atc:12.1, gap:0.19, billing:91.8, collection:91.5, health:"Fair", yoy:"better", acc:24000, trend:[15.8,14.9,14.1,13.4,12.6,12.1], note:"unbundled FY24"},
+  {id:9, state:"Himachal Pradesh", util:"HPSEBL", region:"north", atc:12.9, gap:0.15, billing:91.0, collection:90.2, health:"Good", yoy:"better", acc:1600, trend:[17.2,16.1,15.0,14.2,13.5,12.9]},
+  {id:10, state:"Uttarakhand", util:"UPCL", region:"north", atc:13.1, gap:0.17, billing:90.5, collection:89.8, health:"Good", yoy:"better", acc:1900, trend:[19.2,17.5,16.0,15.0,13.9,13.1]},
+  {id:11, state:"Sikkim", util:"SPDCL", region:"northeast", atc:13.4, gap:0.12, billing:91.5, collection:91.0, health:"Good", yoy:"better", acc:240, trend:[16.1,15.2,14.4,13.9,13.6,13.4]},
+  {id:12, state:"Punjab", util:"PSPCL", region:"north", atc:13.8, gap:0.24, billing:89.5, collection:88.8, health:"Fair", yoy:"better", acc:10800, trend:[18.5,17.2,16.0,15.1,14.4,13.8]},
+  {id:13, state:"Maharashtra", util:"MSEDCL", region:"west", atc:14.1, gap:0.11, billing:91.4, collection:91.0, health:"Fair", yoy:"better", acc:9800, trend:[16.1,15.2,14.4,13.8,14.3,14.1]},
+  {id:14, state:"Haryana", util:"DHBVNL / UHBVNL", region:"north", atc:14.8, gap:0.26, billing:88.4, collection:87.5, health:"Fair", yoy:"better", acc:16200, trend:[22.1,20.5,19.0,18.0,16.2,14.8]},
+  {id:15, state:"Chhattisgarh", util:"CSPDCL", region:"east", atc:15.8, gap:0.31, billing:88.0, collection:87.2, health:"Fair", yoy:"better", acc:6400, trend:[22.1,20.8,19.2,18.2,17.0,15.8]},
+  {id:16, state:"Madhya Pradesh", util:"MPPKVVCL / MPMKVVCL", region:"north", atc:17.4, gap:0.48, billing:85.5, collection:84.8, health:"Fair", yoy:"better", acc:36000, trend:[25.1,23.8,22.2,21.0,19.5,17.4]},
+  {id:17, state:"West Bengal", util:"WBSEDCL", region:"east", atc:18.6, gap:0.38, billing:86.2, collection:85.8, health:"Fair", yoy:"same", acc:14200, trend:[24.2,23.1,21.8,20.8,19.2,18.6]},
+  {id:18, state:"Odisha", util:"NESCO / WESCO / SOUTHCO", region:"east", atc:19.8, gap:0.28, billing:84.8, collection:85.5, health:"Fair", yoy:"better", acc:6200, trend:[35.2,32.1,28.8,25.8,22.5,19.8], note:"privatised FY21"},
+  {id:19, state:"Uttar Pradesh", util:"PVVNL / MVVNL / DVVNL", region:"north", atc:21.4, gap:0.64, billing:82.0, collection:78.5, health:"Poor", yoy:"same", acc:78000, trend:[28.5,27.0,25.2,23.8,22.5,21.4]},
+  {id:20, state:"Rajasthan", util:"JDVVNL / AVVNL / JdVVNL", region:"north", atc:22.8, gap:0.74, billing:82.5, collection:80.8, health:"Poor", yoy:"better", acc:88000, trend:[31.2,29.1,27.2,25.5,23.9,22.8]},
+  {id:21, state:"Tripura", util:"TSECL", region:"northeast", atc:27.2, gap:0.58, billing:79.5, collection:78.0, health:"Poor", yoy:"same", acc:2800, trend:[34.2,32.5,30.8,29.5,28.2,27.2]},
+  {id:22, state:"Bihar", util:"NBPDCL / SBPDCL", region:"east", atc:28.6, gap:0.82, billing:76.8, collection:75.2, health:"Critical", yoy:"same", acc:21000, trend:[38.2,36.5,34.8,33.0,31.0,28.6]},
+  {id:23, state:"Rajasthan (Critical)", util:"JVVNL", region:"north", atc:29.1, gap:0.91, billing:78.5, collection:76.8, health:"Critical", yoy:"worse", acc:22000, trend:[33.5,31.8,30.5,29.8,29.4,29.1]},
+  {id:24, state:"Assam", util:"APDCL", region:"northeast", atc:29.5, gap:0.78, billing:77.2, collection:75.8, health:"Critical", yoy:"same", acc:12500, trend:[36.1,34.5,32.8,31.8,30.5,29.5]},
+  {id:25, state:"Jharkhand", util:"JBVNL", region:"east", atc:35.4, gap:1.08, billing:72.8, collection:70.5, health:"Critical", yoy:"same", acc:16500, trend:[44.1,42.5,40.8,39.2,37.5,35.4]},
+  {id:26, state:"Manipur", util:"MSPDCL", region:"northeast", atc:38.8, gap:1.32, billing:70.2, collection:67.5, health:"Critical", yoy:"worse", acc:5200, trend:[46.2,45.1,43.5,42.0,40.8,38.8]},
+  {id:27, state:"Nagaland", util:"NDPP", region:"northeast", atc:41.2, gap:1.48, billing:67.5, collection:64.0, health:"Critical", yoy:"worse", acc:3800, trend:[48.1,47.0,45.5,44.2,42.8,41.2]},
+  {id:28, state:"Jammu & Kashmir", util:"JKPDD", region:"north", atc:44.8, gap:1.98, billing:64.0, collection:60.5, health:"Critical", yoy:"worse", acc:28500, trend:[52.1,51.0,49.2,48.0,46.5,44.8]},
+];
+
+const YEARS6 = ['FY20','FY21','FY22','FY23','FY24','FY25'];
+const TRENDS = {
+  atc:  [20.6, 19.8, 18.6, 16.4, 16.12, 15.04],
+  gap:  [0.55, 0.52, 0.48, 0.45, 0.39,  0.39],
+  bill: [82.5, 84.1, 85.8, 86.98, 86.91, 87.59],
+  coll: [95.8, 96.2, 97.6, 97.6,  96.51, 98.2],
+};
+
+const GLOSSARY = [
+  {id:'atc', term:'AT&C Loss', full:'Aggregate Technical & Commercial Loss', color:'#1a4fa0', colorlt:'#e3eeff',
+   def:'The percentage of electricity that enters the distribution system but is never paid for. This includes two parts: (1) Technical losses — power lost in wires, transformers and equipment due to resistance and heat. (2) Commercial losses — power used but not billed, or billed but not collected (theft, meter tampering, non-payment).',
+   example:'If a DISCOM receives 100 units of electricity to distribute, but only collects payment for 85 units — the AT&C loss is 15%. The target under RDSS scheme is to bring this below 12–15% nationally.'},
+  {id:'gap', term:'ACS–ARR Gap', full:'Average Cost of Supply minus Average Revenue Realised', color:'#c0392b', colorlt:'#fdecea',
+   def:'The difference between what it costs a DISCOM to supply 1 unit (kWh) of electricity versus what it actually recovers. If the cost is ₹7.50/unit but revenue realised is ₹7.11/unit, the gap is ₹0.39/unit. This gap is either covered by state subsidies or accumulates as losses.',
+   example:'Think of it like a shop that sells bread for ₹20 but it costs ₹25 to make. Every loaf sold is a loss. The government (state) often steps in to cover the difference, but this strains state finances.'},
+  {id:'billing', term:'Billing Efficiency', full:'Energy Billed ÷ Energy Input × 100', color:'#1a7a4a', colorlt:'#e0f5ea',
+   def:'What percentage of electricity supplied actually gets measured and billed to consumers. Low billing efficiency usually means unmetered connections (especially agriculture), meter tampering, or weak energy accounting. The national average improved from 80.69% in FY16 to 87.59% in FY25.',
+   example:'If 100 units of power enter a village but only 82 units appear on consumer bills, billing efficiency is 82%. The 18 units could be unmetered agricultural pumps, theft, or just poor metering infrastructure.'},
+  {id:'collection', term:'Collection Efficiency', full:'Revenue Collected ÷ Revenue Billed × 100', color:'#b7620e', colorlt:'#fef3e2',
+   def:'Of all the bills raised, what percentage is actually collected in cash. Low collection efficiency means consumers aren\'t paying — either because of political interference in disconnections, government departments that default, or large industrial debtors. The LPS (Late Payment Surcharge) rules of 2022 dramatically improved this.',
+   example:'If a DISCOM bills ₹100 crore but only collects ₹94 crore, collection efficiency is 94%. The remaining ₹6 crore is either under dispute, in court, or simply unpaid — and becomes a receivable that erodes cash flow.'},
+  {id:'acc', term:'Accumulated Losses', full:'Total net losses since inception of the utility', color:'#6b21a8', colorlt:'#f3e8ff',
+   def:'The total losses piled up over decades, sitting on the utility\'s balance sheet. Even if a DISCOM becomes operationally profitable today, accumulated losses remain until cleared by state government equity infusion or debt restructuring. At ₹6.47 lakh crore nationally, this is effectively a contingent liability for state governments.',
+   example:'Like a person who starts earning a salary but still has a student loan from 20 years ago. The monthly income is positive, but the total net worth is still negative until the old debt is paid off.'},
+  {id:'rdss', term:'RDSS', full:'Revamped Distribution Sector Scheme', color:'#0f766e', colorlt:'#ccfbf1',
+   def:'The Government of India\'s flagship reform scheme launched in 2021, with ₹3.03 lakh crore outlay. Targets: reduce AT&C losses to 12–15% and ACS–ARR gap to zero by FY 2025–26. Funding linked to performance — DISCOMs must show results to unlock money. 48 DISCOMs across 30 states participating.',
+   example:'Think of it as a performance-linked scholarship for DISCOMs: you get the grant money only if you demonstrate improvements in metering, billing, and loss reduction. Designed to avoid the old pattern of unconditional bailouts.'},
+];
+
+const SOURCES = [
+  {status:'live', label:'PFC Annual Report FY 2024–25', detail:'Primary source. Covers 63 utilities across 28 states. AT&C losses, ACS–ARR gap, billing efficiency, collection efficiency, capex, subsidies, accumulated losses. Auto-parsed via PDF extraction. Released March 2025.'},
+  {status:'live', label:'data.gov.in — Open Government Data Platform', detail:'REST API. Supplementary DISCOM-level datasets including consumer counts, energy sold, tariff data, subsidy disbursals. Free API, no authentication required.'},
+  {status:'live', label:'NITI Aayog ICED Dashboard', detail:'iced.niti.gov.in — Integrated Comprehensive Energy Dataset. Used for cross-validation of PFC data. State-wise accumulated losses and consumer sales.'},
+  {status:'annual', label:'MoP Integrated Rating — 13th Annual Edition', detail:'Ministry of Power composite rating across financial and operational parameters. Used for health rating calibration. FY24 edition.'},
+  {status:'historical', label:'UDAY Portal', detail:'uday.gov.in — Historical data FY19–FY21. States stopped updating post-FY21. Used only for trend charts.'},
+];
+
+// ════ CHARTS SETUP ════
+Chart.defaults.font.family = 'DM Sans, sans-serif';
+Chart.defaults.font.size = 11;
+Chart.defaults.color = '#4a5568';
+
+const cOpts = (extra={}) => ({
+  responsive:true, maintainAspectRatio:false,
+  plugins:{ legend:{display:false}, tooltip:{backgroundColor:'#0d1117',titleFont:{size:12},bodyFont:{size:11},padding:10,cornerRadius:8,borderColor:'rgba(0,0,0,0.1)',borderWidth:1} },
+  scales:{ x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{color:'#8a9bb0'}}, y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{color:'#8a9bb0'}} },
+  ...extra
+});
+
+// ════ STATE ════
+let filtered=[...DATA], sKey='atc', sDir=1, dpChart=null;
+let chartsRendered=false, trendsRendered=false;
+
+// ════ NAV ════
+function navTo(pg, btn){
+  document.querySelectorAll('.dash-page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.dash-nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('pg-'+pg).classList.add('active');
+  btn.classList.add('active');
+  const titles={overview:'National Overview — FY 2024–25',stress:'Stress Monitor',trends:'5-Year National Trends (FY20–FY25)',compare:'Compare States',glossary:'Glossary of Terms',sources:'Data Sources & Pipeline'};
+  document.getElementById('dash-title').textContent=titles[pg]||pg;
+  if(pg==='trends'&&!trendsRendered){renderTrends();trendsRendered=true;}
+  if(pg==='compare'){populateCmp();}
+  if(pg==='glossary'){renderGloss();}
+  if(pg==='sources'){renderSources();}
+}
+
+function switchSub(id,btn){
+  document.querySelectorAll('.sub-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.page-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  if(id==='tab-charts'&&!chartsRendered){renderCharts();chartsRendered=true;}
+}
+
+// ════ VIEW SWITCHING ════
+function showDash(page){
+  document.getElementById('view-landing').classList.remove('active');
+  document.getElementById('view-dashboard').classList.add('active');
+  if(page){const btn=document.querySelector(`.dash-nav-item[onclick*="${page}"]`);if(btn)navTo(page,btn);}
+  if(!filtered.length){filtered=[...DATA];renderTable();}
+  renderStress();renderGloss();renderSources();
+}
+function showLanding(){
+  document.getElementById('view-dashboard').classList.remove('active');
+  document.getElementById('view-landing').classList.add('active');
+}
+function scrollTo(hash){document.querySelector(hash)?.scrollIntoView({behavior:'smooth'});}
+
+// ════ TABLE ════
+const avatars=[['#1e3a5f','#bfdbfe'],['#14532d','#bbf7d0'],['#3b0764','#e9d5ff'],['#450a0a','#fecaca'],['#422006','#fde68a'],['#0c4a6e','#bae6fd'],['#1e1b4b','#c7d2fe'],['#134e4a','#99f6e4']];
+function av(i){return avatars[i%avatars.length];}
+function hpClass(h){return {Good:'hp-good',Fair:'hp-fair',Poor:'hp-poor',Critical:'hp-critical'}[h]||'hp-fair';}
+function hpColor(h){return {Good:'#1a7a4a',Fair:'#b7620e',Poor:'#c0392b',Critical:'#8b0000'}[h]||'#b7620e';}
+function atcColor(v){return v>30?'#c0392b':v>20?'#b7620e':v>15?'#b7620e':'#1a7a4a';}
+
+function renderTable(){
+  const sorted=[...filtered].sort((a,b)=>{
+    if(typeof a[sKey]==='string')return a[sKey].localeCompare(b[sKey])*sDir;
+    return (a[sKey]-b[sKey])*sDir;
+  });
+  document.getElementById('tbody').innerHTML=sorted.map((d,i)=>{
+    const [bg,fg]=av(i);
+    const col=atcColor(d.atc);
+    const yoyEl=d.yoy==='better'?'<span class="yoy-chip yoy-up">▼ Improving</span>':d.yoy==='worse'?'<span class="yoy-chip yoy-dn">▲ Worsening</span>':'<span class="yoy-chip yoy-eq">→ Stable</span>';
+    const gCol=d.gap<0?'#1a7a4a':d.gap>0.8?'#c0392b':'#b7620e';
+    return `<tr onclick="openDet(${d.id})">
+      <td><div class="state-cell"><div class="state-av" style="background:${bg};color:${fg}">${d.state.substring(0,2).toUpperCase()}</div><div><div class="state-name">${d.state}</div><div class="state-util">${d.util.split('/')[0].trim()}</div></div></div></td>
+      <td><div class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:${Math.min(d.atc/50*100,100)}%;background:${col}"></div></div><span class="mono" style="color:${col}">${d.atc}%</span></div></td>
+      <td><span class="mono" style="color:${gCol}">${d.gap>0?'+':''}₹${d.gap.toFixed(2)}</span></td>
+      <td><span class="mono">${d.billing.toFixed(1)}%</span></td>
+      <td><span class="mono">${d.collection.toFixed(1)}%</span></td>
+      <td><span class="health-pill ${hpClass(d.health)}">● ${d.health}</span></td>
+      <td>${yoyEl}</td>
+    </tr>`;
+  }).join('');
+}
+
+function srt(k){if(sKey===k)sDir*=-1;else{sKey=k;sDir=1;}document.querySelectorAll('thead th').forEach(t=>t.classList.remove('sorted'));renderTable();}
+function searchTable(q){applyF(q);}
+function applyF(q){
+  const sq=q??document.getElementById('srch').value;
+  const r=document.getElementById('reg-f').value, h=document.getElementById('hlth-f').value;
+  filtered=DATA.filter(d=>(r==='all'||d.region===r)&&(h==='all'||d.health===h)&&(sq===''||d.state.toLowerCase().includes(sq.toLowerCase())||d.util.toLowerCase().includes(sq.toLowerCase())));
+  renderTable();
+}
+
+// ════ CHARTS ════
+function renderCharts(){
+  const bands={'<10%':0,'10–15%':0,'15–20%':0,'20–30%':0,'>30%':0};
+  DATA.forEach(d=>{if(d.atc<10)bands['<10%']++;else if(d.atc<15)bands['10–15%']++;else if(d.atc<20)bands['15–20%']++;else if(d.atc<30)bands['20–30%']++;else bands['>30%']++;});
+  new Chart(document.getElementById('c-dist'),{type:'bar',data:{labels:Object.keys(bands),datasets:[{data:Object.values(bands),backgroundColor:['#1a7a4a','#4ade80','#fbbf24','#f97316','#ef4444'],borderRadius:7,borderSkipped:false}]},options:{...cOpts(),plugins:{...cOpts().plugins,tooltip:{...cOpts().plugins.tooltip,callbacks:{label:c=>`${c.raw} utilities`}}}}});
+
+  const regs=['north','south','east','west','northeast'];
+  const rLbl=['North','South','East','West','NE'];
+  const rGaps=regs.map(r=>{const rd=DATA.filter(d=>d.region===r);return+(rd.reduce((s,d)=>s+d.gap,0)/rd.length).toFixed(2);});
+  new Chart(document.getElementById('c-region'),{type:'bar',data:{labels:rLbl,datasets:[{data:rGaps,backgroundColor:rGaps.map(v=>v>0.5?'#ef4444':v>0.2?'#f59e0b':'#10b981'),borderRadius:7,borderSkipped:false}]},options:{...cOpts(),plugins:{...cOpts().plugins,tooltip:{...cOpts().plugins.tooltip,callbacks:{label:c=>`₹${c.raw}/unit avg`}}}}});
+
+  const top10=[...DATA].sort((a,b)=>b.atc-a.atc).slice(0,10);
+  new Chart(document.getElementById('c-bvc'),{type:'bar',data:{labels:top10.map(d=>d.state.split(' ')[0]),datasets:[{label:'Billing',data:top10.map(d=>d.billing),backgroundColor:'rgba(26,79,160,0.7)',borderRadius:5},{label:'Collection',data:top10.map(d=>d.collection),backgroundColor:'rgba(26,122,74,0.7)',borderRadius:5}]},options:{...cOpts(),plugins:{...cOpts().plugins,legend:{display:true,position:'top',labels:{color:'#4a5568',font:{size:11}}}}}});
+
+  const hc={Good:0,Fair:0,Poor:0,Critical:0};DATA.forEach(d=>hc[d.health]++);
+  new Chart(document.getElementById('c-pie'),{type:'doughnut',data:{labels:Object.keys(hc),datasets:[{data:Object.values(hc),backgroundColor:['#1a7a4a','#b7620e','#c0392b','#8b0000'],borderWidth:2,borderColor:'#fff',hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'right',labels:{color:'#4a5568',font:{size:11},padding:12}},tooltip:{backgroundColor:'#0d1117',padding:10,cornerRadius:8}},cutout:'62%'}});
+}
+
+// ════ TRENDS ════
+function renderTrends(){
+  const lo=(key,color,unit)=>({type:'line',data:{labels:YEARS6,datasets:[{data:TRENDS[key],borderColor:color,backgroundColor:color+'22',fill:true,tension:0.4,pointRadius:5,pointBackgroundColor:color,pointBorderColor:'#fff',pointBorderWidth:2}]},options:{...cOpts(),plugins:{...cOpts().plugins,tooltip:{...cOpts().plugins.tooltip,callbacks:{label:c=>`${c.raw}${unit}`}}}}});
+  new Chart(document.getElementById('t-atc'),lo('atc','#1a4fa0','%'));
+  new Chart(document.getElementById('t-gap'),lo('gap','#c0392b',' ₹/unit'));
+  new Chart(document.getElementById('t-bill'),lo('bill','#1a7a4a','%'));
+  new Chart(document.getElementById('t-coll'),lo('coll','#b7620e','%'));
+}
+
+// ════ STRESS ════
+function stressScore(d){
+  let s=0;
+  if(d.atc>35)s+=30;else if(d.atc>25)s+=22;else if(d.atc>18)s+=12;
+  if(d.gap>1.2)s+=28;else if(d.gap>0.7)s+=18;else if(d.gap>0.3)s+=8;
+  if(d.yoy==='worse')s+=22;else if(d.yoy==='same')s+=8;
+  if(d.collection<72)s+=20;else if(d.collection<82)s+=10;
+  return Math.min(s,100);
+}
+function renderStress(){
+  const stressed=DATA.filter(d=>d.health==='Critical'||(d.health==='Poor'&&d.yoy!=='better')).sort((a,b)=>stressScore(b)-stressScore(a));
+  document.getElementById('stress-grid').innerHTML=stressed.map(d=>{
+    const sc=stressScore(d);
+    const col=sc>70?'#c0392b':sc>50?'#b7620e':'#8a9bb0';
+    const flags=[];
+    if(d.atc>30)flags.push('High AT&C loss');if(d.gap>1.0)flags.push('Gap >₹1/unit');if(d.yoy==='worse')flags.push('Worsening trend');if(d.collection<72)flags.push('Low collection');
+    return `<div class="stress-card" onclick="openDet(${d.id})">
+      <div class="sc-state">${d.state}</div><div class="sc-util">${d.util.split('/')[0].trim()}</div>
+      <div class="sc-bar"><div class="sc-fill" style="width:${sc}%;background:${col}"></div></div>
+      <div class="sc-score" style="color:${col}">${sc}<span style="font-size:14px;font-weight:400;color:var(--text3)">/100</span></div>
+      <div class="sc-score-label">Stress Score</div>
+      <div class="sc-flags">${flags.slice(0,3).map(f=>`<span class="sc-flag">${f}</span>`).join('')}</div>
+    </div>`;
+  }).join('');
+}
+
+// ════ DETAIL PANEL ════
+function openDet(id){
+  const d=DATA.find(x=>x.id===id);if(!d)return;
+  document.getElementById('dp-name').textContent=d.state;
+  document.getElementById('dp-util').textContent=d.util+' · '+d.region.charAt(0).toUpperCase()+d.region.slice(1)+' India'+(d.note?' · '+d.note:'');
+  const col=atcColor(d.atc), gc=d.gap<0?'#1a7a4a':d.gap>0.8?'#c0392b':'#b7620e';
+  document.getElementById('dp-kpis').innerHTML=[
+    {label:'AT&C Loss',val:`${d.atc}%`,color:col},{label:'ACS–ARR Gap',val:`${d.gap>0?'+':''}₹${d.gap.toFixed(2)}/unit`,color:gc},{label:'Health Rating',val:d.health,color:hpColor(d.health)},
+  ].map(k=>`<div class="dp-kpi"><div class="dp-kpi-label">${k.label}</div><div class="dp-kpi-val" style="color:${k.color}">${k.val}</div></div>`).join('');
+  document.getElementById('dp-info').innerHTML=[
+    ['Billing Efficiency',d.billing.toFixed(1)+'%'],['Collection Efficiency',d.collection.toFixed(1)+'%'],
+    ['YoY Trend',d.yoy==='better'?'▼ Improving':d.yoy==='worse'?'▲ Worsening':'→ Stable'],
+    ['Acc. Losses',d.acc>0?'₹'+d.acc.toLocaleString('en-IN')+' Cr':'None / Surplus'],
+    ['Region',d.region.charAt(0).toUpperCase()+d.region.slice(1)+' India'],['MoP Rating',d.health],
+  ].map(([l,v])=>`<div class="dp-info-row"><div class="dp-info-label">${l}</div><div class="dp-info-val">${v}</div></div>`).join('');
+  genAI(d);
+  if(dpChart)dpChart.destroy();
+  dpChart=new Chart(document.getElementById('dp-chart'),{type:'line',data:{labels:YEARS6,datasets:[{data:d.trend,borderColor:'#1a4fa0',backgroundColor:'rgba(26,79,160,0.08)',fill:true,tension:0.4,pointRadius:4,pointBackgroundColor:'#1a4fa0',pointBorderColor:'#fff',pointBorderWidth:2}]},options:{...cOpts(),plugins:{...cOpts().plugins,tooltip:{...cOpts().plugins.tooltip,callbacks:{label:c=>`AT&C: ${c.raw}%`}}}}});
+  document.getElementById('det-overlay').classList.add('open');
+}
+function genAI(d){
+  const el=document.getElementById('dp-ai');el.textContent='Generating…';
+  let t='';
+  if(d.health==='Good')t+=`${d.state} is one of India's better-performing utilities with AT&C losses of ${d.atc}% — below the national average of 15.04%. `;
+  else if(d.health==='Critical')t+=`${d.state} is in critical financial distress. With AT&C losses of ${d.atc}%, it is among the worst-performing utilities in India. `;
+  else t+=`${d.state} shows ${d.health.toLowerCase()} financial health with AT&C losses of ${d.atc}% against a national average of 15.04%. `;
+  if(d.gap<0)t+=`A negative ACS–ARR gap of ₹${Math.abs(d.gap).toFixed(2)}/unit means it recovers more than its cost of supply — a genuine financial positive. `;
+  else if(d.gap>1.0)t+=`The ACS–ARR gap of ₹${d.gap.toFixed(2)}/unit is severe — every unit sold costs the utility ₹${d.gap.toFixed(2)} more than it recovers. This is unsustainable without large state subsidies. `;
+  else t+=`The ACS–ARR gap of ₹${d.gap.toFixed(2)}/unit requires continued tariff reform to eliminate. `;
+  if(d.yoy==='worse')t+=`Worryingly, key metrics have worsened year-on-year, suggesting the situation may deteriorate further without intervention. `;
+  else if(d.yoy==='better')t+=`Positively, year-on-year trends show improvement — ongoing reforms appear to be gaining traction. `;
+  const improvement=d.trend[0]-d.trend[5];
+  if(improvement>5)t+=`Over 5 years, AT&C losses have improved by ${improvement.toFixed(1)} percentage points — a strong long-term trajectory.`;
+  else if(improvement<0)t+=`AT&C losses have actually risen over 5 years — a warning sign of structural challenges.`;
+  setTimeout(()=>{el.textContent=t;},500);
+}
+function closeDet(e){if(!e||e.target===document.getElementById('det-overlay'))document.getElementById('det-overlay').classList.remove('open');}
+
+// ════ COMPARE ════
+function populateCmp(){['c1','c2','c3'].forEach(id=>{const s=document.getElementById(id);const cur=s.value;while(s.options.length>1)s.remove(1);DATA.forEach(d=>{s.add(new Option(d.state,d.id));});s.value=cur;});renderCmp();}
+function renderCmp(){
+  const ids=['c1','c2','c3'].map(id=>+document.getElementById(id).value).filter(Boolean);
+  if(!ids.length){document.getElementById('cmp-out').innerHTML='<div style="color:var(--text3);font-size:13px;padding:20px 0">Select at least one state to compare.</div>';return;}
+  const sel=ids.map(id=>DATA.find(d=>d.id===id));
+  const metrics=[{k:'atc',l:'AT&C Loss',u:'%',b:'low'},{k:'gap',l:'ACS–ARR Gap',u:'₹/unit',b:'low'},{k:'billing',l:'Billing Efficiency',u:'%',b:'high'},{k:'collection',l:'Collection Efficiency',u:'%',b:'high'}];
+  document.getElementById('cmp-out').innerHTML=`<div style="overflow-x:auto"><table class="cmp-table">
+    <thead><tr><th>Metric</th>${sel.map(d=>`<th>${d.state}</th>`).join('')}</tr></thead>
+    <tbody>
+    ${metrics.map(m=>{
+      const vals=sel.map(d=>d[m.k]);
+      const best=m.b==='low'?Math.min(...vals):Math.max(...vals);
+      const worst=m.b==='low'?Math.max(...vals):Math.min(...vals);
+      return `<tr><td style="color:var(--text2);font-weight:500">${m.l}</td>${sel.map(d=>{
+        const v=d[m.k];const isBest=v===best&&sel.length>1;const isWorst=v===worst&&sel.length>1;
+        return `<td class="${isBest?'cmp-best':isWorst?'cmp-worst':''}">${m.u==='₹/unit'?`${v>0?'+':''}₹${v.toFixed(2)}`:v.toFixed(1)+m.u}${isBest?' ✓':''}</td>`;
+      }).join('')}</tr>`;
+    }).join('')}
+    <tr><td style="color:var(--text2);font-weight:500">Health Rating</td>${sel.map(d=>`<td><span class="health-pill ${hpClass(d.health)}">● ${d.health}</span></td>`).join('')}</tr>
+    </tbody></table></div>`;
+}
+
+// ════ GLOSSARY ════
+function renderGloss(){
+  document.getElementById('gloss-grid').innerHTML=GLOSSARY.map(g=>`
+    <div class="gloss-card">
+      <div class="gloss-term"><span>${g.term}</span><span class="gloss-abbr">${g.term}</span></div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px">${g.full}</div>
+      <div class="gloss-def">${g.def}</div>
+      <div class="gloss-example"><div class="gloss-ex-label">Real-world example</div>${g.example}</div>
+    </div>`).join('');
+}
+function showGloss(id){
+  const btn=document.querySelector(`.dash-nav-item[onclick*="glossary"]`);
+  if(btn)navTo('glossary',btn);
+  setTimeout(()=>{document.getElementById('pg-glossary')?.scrollIntoView({behavior:'smooth'});},100);
+}
+
+// ════ SOURCES ════
+function renderSources(){
+  document.getElementById('sources-list').innerHTML=SOURCES.map(s=>`
+    <div style="background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:18px 22px;display:flex;align-items:flex-start;gap:14px">
+      <div style="width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px;background:${s.status==='live'?'#1a7a4a':s.status==='annual'?'#b7620e':'#8a9bb0'}"></div>
+      <div style="flex:1"><div style="font-size:14px;font-weight:600;margin-bottom:4px">${s.label}</div><div style="font-size:12px;color:var(--text2);line-height:1.6">${s.detail}</div></div>
+      <div style="font-size:11px;font-weight:600;padding:4px 10px;border-radius:12px;white-space:nowrap;flex-shrink:0;background:${s.status==='live'?'var(--green-lt)':s.status==='annual'?'var(--amber-lt)':'var(--surface2)'};color:${s.status==='live'?'var(--green)':s.status==='annual'?'var(--amber)':'var(--text3)'}">${s.status==='live'?'✓ Active':s.status==='annual'?'Annual':'Historical'}</div>
+    </div>`).join('');
+}
+
+// ════ EXPORT ════
+function exportCSV(){
+  const h=['State','Utility','Region','AT&C Loss (%)','ACS-ARR Gap (Rs/unit)','Billing Eff (%)','Collection Eff (%)','Health','YoY Trend'];
+  const rows=filtered.map(d=>[d.state,d.util.split('/')[0].trim(),d.region,d.atc,d.gap,d.billing.toFixed(1),d.collection.toFixed(1),d.health,d.yoy]);
+  const csv=[h,...rows].map(r=>r.join(',')).join('\n');
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='DISCOM_Watch_FY2024-25.csv';a.click();
+}
+
+// ════ INIT ════
+filtered=[...DATA];
+renderTable();
+renderStress();
+renderGloss();
+renderSources();
+</script>
+</body>
+</html>
